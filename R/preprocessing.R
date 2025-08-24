@@ -9,8 +9,9 @@
 #' @return A list with two tibbles: \code{barcodes} and \code{images}
 #'
 #' @importFrom arrow read_parquet
-#' @importFrom dplyr rename_with
+#' @importFrom dplyr rename_with %>% bind_rows mutate
 #' @importFrom rjson fromJSON
+#' @importFrom stats filter
 #'
 #' @export
 #' @concept preprocessing
@@ -28,18 +29,18 @@ Load_Spatial_Data<-function(
     size="008um"
     )
 {images <- Create_Images(data.dir) %>% bind_rows()
-tissue_positions_data.dir <- list.files(paste0(data.dir, "/binned_outputs/square_",size,"/spatial"), pattern = "tissue_positions*", full.names = TRUE)
-tissue_positions_file <- basename(tissue_positions_data.dir)
-tissue_positions_df <- arrow::read_parquet(tissue_positions_data.dir)%>%
+tissue_positions_path <- list.files(paste0(data.dir, "/binned_outputs/square_",size,"/spatial"), pattern = "tissue_positions*", full.names = TRUE)
+tissue_positions_file <- basename(tissue_positions_path)
+tissue_positions_df <- arrow::read_parquet(tissue_positions_path)%>%
   dplyr::rename_with(~ c("barcode", "tissue", "row", "col", "imagerow", "imagecol"))
-data.dir_scales <- file.data.dir(data.dir, paste0("/binned_outputs/square_",size,"/spatial/scalefactors_json.json"))
-scales <- rjson::fromJSON(file = data.dir_scales)
-data.dir_clusters <- file.data.dir(data.dir, paste0("/binned_outputs/square_",size,"/analysis_csv/clustering/gene_expression_graphclust/clusters.csv"))
-images_mod <- images %>% filter(data.dir == data.dir)
-if(file.exists(data.dir_clusters))
-{clusters <- read.csv(data.dir_clusters)
-data.dir_umap <- file.data.dir(data.dir, paste0("/binned_outputs/square_",size,"/analysis_csv/umap/gene_expression_2_components/projection.csv"))
-umap <- read.csv(data.dir_umap)
+path_scales <- file.path(data.dir, paste0("/binned_outputs/square_",size,"/spatial/scalefactors_json.json"))
+scales <- rjson::fromJSON(file = path_scales)
+path_clusters <- file.path(data.dir, paste0("/binned_outputs/square_",size,"/analysis_csv/clustering/gene_expression_graphclust/clusters.csv"))
+images_mod <- images
+if(file.exists(path_clusters))
+{clusters <- read.csv(path_clusters)
+path_umap <- file.path(data.dir, paste0("/binned_outputs/square_",size,"/analysis_csv/umap/gene_expression_2_components/projection.csv"))
+umap <- read.csv(path_umap)
 barcodes <- tissue_positions_df %>% mutate(imagerow_scaled = imagerow *
                                         scales$tissue_lowres_scalef, imagecol_scaled = imagecol *
                                         scales$tissue_lowres_scalef, imagerow_scaled_round = round(imagerow *
@@ -60,9 +61,10 @@ barcodes <- tissue_positions_df %>% mutate(imagerow_scaled = imagerow *
     mutate(height = images_mod$height,
            width = images_mod$width)}
 cell_id_path <- paste0(data.dir, "/barcode_mappings.parquet")
+if(file.exists(cell_id_path)){
 cell_id_df <- arrow::read_parquet(cell_id_path)
 cell_id_df_column=paste0('square_',size)
-barcodes$cellid=cell_id_df$cell_id[match(barcodes$barcode,cell_id_df%>%pull(cell_id_df_column))]
+barcodes$cellid=cell_id_df$cell_id[match(barcodes$barcode,cell_id_df%>%pull(cell_id_df_column))]}
 return(list(images=images,barcodes=barcodes))}
 
 
@@ -76,6 +78,8 @@ return(list(images=images,barcodes=barcodes))}
 #' @return An images tibble
 #'
 #' @importFrom grid rasterGrob unit
+#' @importFrom dplyr %>%
+#' @importFrom tibble tibble
 #'
 #' @export
 #' @concept preprocessing
@@ -90,7 +94,7 @@ return(list(images=images,barcodes=barcodes))}
 Create_Images<-function (data.dir)
 {image <- Get_Spatial_Files(data.dir, "tissue_lowres_image")
 grobs <- grid::rasterGrob(image, width = grid::unit(1.1, "npc"), height = grid::unit(1.1, "npc"), hjust=0.495, vjust=0.495)
-images <- tibble(data.dir = factor(data.dir), grob = list(grobs), height = nrow(image), width = ncol(image))
+images <- tibble(dir = factor(data.dir), grob = list(grobs), height = nrow(image), width = ncol(image))
 return(images)}
 
 
@@ -118,13 +122,13 @@ return(images)}
 #'
 Get_Spatial_Files<-function (data.dir, type)
 {if (type == "tissue_lowres_image") {
-  x <- readbitmap::read.bitmap(paste(PATH, "/spatial/tissue_lowres_image.png", sep = ""))}
+  x <- readbitmap::read.bitmap(paste(data.dir, "/spatial/tissue_lowres_image.png", sep = ""))}
   if (type == "tissue_hires_image") {
-    x <- readbitmap::read.bitmap(paste(PATH, "/spatial/tissue_hires_image.png", sep = ""))}
+    x <- readbitmap::read.bitmap(paste(data.dir, "/spatial/tissue_hires_image.png", sep = ""))}
   if (type == "aligned_fiducials") {
-    x <- readbitmap::read.bitmap(paste(PATH, "/spatial/aligned_fiducials.jpg", sep = ""))}
+    x <- readbitmap::read.bitmap(paste(data.dir, "/spatial/aligned_fiducials.jpg", sep = ""))}
   if (type == "detected_tissue_image") {
-    x <- readbitmap::read.bitmap(paste(PATH, "/spatial/detected_tissue_image.jpg", sep = ""))}
+    x <- readbitmap::read.bitmap(paste(data.dir, "/spatial/detected_tissue_image.jpg", sep = ""))}
   return(x)}
 
 
