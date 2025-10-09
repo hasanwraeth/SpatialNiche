@@ -22,7 +22,7 @@ the spatial files.
 \dontrun{
 data_dir <- 'path/to/outs/directory'
 list.files(data_dir) # Should show spatial folder
-image=Get_Spatial_Files(data.dir = data_dir, type="tissue_lowres_image")
+Image=Get_Spatial_Files(data.dir = data_dir, type="tissue_lowres_image")
 }
 
 }

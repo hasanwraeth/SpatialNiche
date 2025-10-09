@@ -19,7 +19,8 @@
 
 Load_RCTD<-function(data)
 {RCTD<-readRDS(data)
-weights <- get_doublet_weights_modified(RCTD@results$results_df, RCTD@results$weights_doublet, RCTD@cell_type_info$info[[2]])
+Info=RCTD@results$results_df
+weights <- Get_Doublet_Weights_Modified(RCTD@results$results_df, RCTD@results$weights_doublet, RCTD@cell_type_info$info[[2]])
 Results <- list(RCTD_df = Info, Weights = t(weights))
 return(Results)}
 

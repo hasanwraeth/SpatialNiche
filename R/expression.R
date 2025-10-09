@@ -1,11 +1,11 @@
 #' Add gene expression data to the barcodes tibble
 #'
-#' This function uses a Seurat object to load specific gene expression data to
-#' the barcodes tibble.
+#' This function adds gene expression data from a Seurat object to the
+#' previously generated barcodes tibble.
 #'
 #' @param barcodes The barcodes tibble
+#' @param gene The gene at the center
 #' @param seurat The Seurat object of Visium HD analysis
-#' @param genes A list of genes whose expression is to be added
 #'
 #' @return A \code{barcodes} tibble with the gene expression data added to it
 #'
@@ -16,13 +16,14 @@
 #'
 #' @examples
 #' \dontrun{
-#' Barcodes=Add_Expression(barcodes=Barcodes,seurat=Seurat)
+#' Barcodes=Add_Expression(barcodes=Barcodes, gene="GAPDH", seurat=Seurat)
 #' }
 #'
 
-Add_Expression<-function(barcodes,seurat,genes)
-{Exp<-SeuratObject::FetchData(seurat,genes)
-for(Gx in genes)
-{barcodes[,Gx]<-NA
-barcodes[match(rownames(Exp),barcodes$barcode),Gx]<-Exp[,Gx]}
-return(barcodes)}
+Add_Expression<-function(barcodes,seurat,gene)
+{seurat<-subset(seurat,cells=barcodes$barcode)
+  Exp<-FetchData(seurat,gene)
+  for(Gx in gene)
+  {barcodes[,Gx]<-NA
+  barcodes[match(rownames(Exp),barcodes$barcode),Gx]<-Exp[,Gx]}
+  return(barcodes)}

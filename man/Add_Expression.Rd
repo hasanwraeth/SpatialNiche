@@ -4,25 +4,25 @@
 \alias{Add_Expression}
 \title{Add gene expression data to the barcodes tibble}
 \usage{
-Add_Expression(barcodes, seurat, genes)
+Add_Expression(barcodes, seurat, gene)
 }
 \arguments{
 \item{barcodes}{The barcodes tibble}
 
 \item{seurat}{The Seurat object of Visium HD analysis}
 
-\item{genes}{A list of genes whose expression is to be added}
+\item{gene}{The gene at the center}
 }
 \value{
 A \code{barcodes} tibble with the gene expression data added to it
 }
 \description{
-This function uses a Seurat object to load specific gene expression data to
-the barcodes tibble.
+This function adds gene expression data from a Seurat object to the
+previously generated barcodes tibble.
 }
 \examples{
 \dontrun{
-Barcodes=Add_Expression(barcodes=Barcodes,seurat=Seurat)
+Barcodes=Add_Expression(barcodes=Barcodes, gene="GAPDH", seurat=Seurat)
 }
 
 }

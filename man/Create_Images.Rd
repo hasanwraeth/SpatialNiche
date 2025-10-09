@@ -20,7 +20,7 @@ a graphical object (grob) that represents a raster image.
 \dontrun{
 data_dir <- 'path/to/outs/directory'
 list.files(data_dir) # Should show spatial folder
-images=Create_Images(data.dir = data_dir)
+Images=Create_Images(data.dir = data_dir)
 }
 
 }

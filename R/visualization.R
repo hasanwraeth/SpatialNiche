@@ -11,7 +11,8 @@
 #' @return A list of ggplot objects
 #'
 #' @importFrom dplyr pull
-#' @importFrom ggplot2 ggplot geom_point coord_cartesian
+#' @importFrom ggplot2 ggplot geom_point coord_cartesian aes xlab ylab theme
+#' theme_set theme_bw theme_minimal scale_color_gradient labs element_blank
 #' @importFrom scattermore geom_scattermore
 #'
 #' @export
@@ -64,3 +65,44 @@ Spatial_Feature_Plot<-function(barcodes,gene,pt.size=2,shape="circle")
     stop("Wrong Shape")
   }
   return(Plot)}
+
+#' Visualize HE image on a spatial plot
+#'
+#' This function creates a graphical object (grob) that represents a raster
+#' image from the images tibble
+#'
+#' @param barcodes The barcodes tibble
+#' @param gene The gene whose expression is to be plotted
+#' @param pt.size The dize of the points
+#' @param shape The shape of the slice involved (either "circle" or "square")
+#'
+#' @return A list of ggplot objects
+#'
+#' @importFrom dplyr pull
+#' @importFrom ggplot2 ggproto ggproto_parent layer
+#' @importFrom grid viewport editGrob
+#'
+#' @export
+#' @concept visualization
+#'
+#' @examples
+#' \dontrun{
+#' PlotA=Geom_Spatial(data=Images, , aes(grob = grob), x = 0.5, y = 0.5)
+#' }
+#'
+
+Geom_Spatial<-function (mapping = NULL, data = NULL, stat = "identity", position = "identity",
+                        na.rm = FALSE, show.legend = NA, inherit.aes = FALSE, ...)
+{GeomCustom <- ggproto("GeomCustom", Geom, setup_data = function(self,
+                                                                 data, params) {
+  data <- ggproto_parent(Geom, self)$setup_data(data, params)
+  data
+}, draw_group = function(data, panel_scales, coord) {
+  vp <- grid::viewport(x = data$x, y = data$y)
+  g <- grid::editGrob(data$grob[[1]], vp = vp)
+  ggplot2:::ggname("Geom_Spatial", g)
+}, required_aes = c("grob", "x", "y"))
+layer(geom = GeomCustom, mapping = mapping, data = data,
+      stat = stat, position = position, show.legend = show.legend,
+      inherit.aes = inherit.aes, params = list(na.rm = na.rm,
+                                               ...))}

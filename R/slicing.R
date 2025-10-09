@@ -11,8 +11,7 @@
 #'
 #' @return A character vector of the barcodes in the square region
 #'
-#' @importFrom dplyr pull
-#' @importFrom stats filter
+#' @importFrom dplyr pull filter
 #'
 #' @export
 #' @concept slicing
@@ -32,7 +31,7 @@ Get_Square<-function(spot,size_microns,barcodes,binsize=8)
   Xmax<-Xcenter+AddFactor
   Ymin<-Ycenter-AddFactor
   Ymax<-Ycenter+AddFactor
-  SquareSection<-barcodes %>% stats::filter(col >= Xmin & col <= Xmax & row >= Ymin & row <= Ymax) %>% dplyr::pull(barcode)
+  SquareSection<-barcodes %>% dplyr::filter(col >= Xmin & col <= Xmax & row >= Ymin & row <= Ymax) %>% dplyr::pull(barcode)
   return(SquareSection)}
 
 #' Create a character vector of a rectangular region for sub-setting
@@ -50,8 +49,7 @@ Get_Square<-function(spot,size_microns,barcodes,binsize=8)
 #'
 #' @return A character vector of the barcodes in the rectangular region
 #'
-#' @importFrom dplyr pull
-#' @importFrom stats filter
+#' @importFrom dplyr pull filter
 #'
 #' @export
 #' @concept slicing
@@ -71,7 +69,7 @@ Get_Rectangle<-function(spot,size_microns,xfactor,yfactor,barcodes,binsize=8)
   Xmax<-Xcenter+(AddFactor*xfactor)
   Ymin<-Ycenter-(AddFactor*yfactor)
   Ymax<-Ycenter+(AddFactor*yfactor)
-  RectSection<-barcodes %>% stats::filter(col >= Xmin & col <= Xmax & row >= Ymin & row <= Ymax) %>%  dplyr::pull(barcode)
+  RectSection<-barcodes %>% dplyr::filter(col >= Xmin & col <= Xmax & row >= Ymin & row <= Ymax) %>%  dplyr::pull(barcode)
   return(RectSection)}
 
 #' Create a character vector of a circular region for sub-setting
@@ -112,7 +110,7 @@ Get_Circle<-function(spot,size_microns,barcodes,data.dir,celltype=NA,binsize="00
   {Distance<-sqrt(((barcodes$imagecol-barcodes$imagecol[Index[jj]])^2) + ((barcodes$imagerow-barcodes$imagerow[Index[jj]])^2))
   barcodes$Distance<-Distance
   if(!is.na(celltype))
-  {ValTh <- sum(BarcodeDF$DeconvolutionLabel1[BarcodeDF$Distance<min(Scale)]==celltype,na.rm = T)
+  {ValTh <- sum(barcodes$DeconvolutionLabel1[barcodes$Distance<min(Scale)]==celltype,na.rm = T)
   if(ValTh < 25)
   {next}}
   if(length(Scale)>1)
@@ -146,7 +144,7 @@ Get_Circle<-function(spot,size_microns,barcodes,data.dir,celltype=NA,binsize="00
 #'
 #' @return A character vector of the barcodes surrounding a cell type
 #'
-#' @importFrom stats filter
+#' @importFrom dplyr filter
 #'
 #' @export
 #' @concept slicing
@@ -161,8 +159,8 @@ Get_Circle<-function(spot,size_microns,barcodes,data.dir,celltype=NA,binsize="00
 #'
 
 Get_Periphery<-function(barcodes,celltype,distance=50,data.dir, binsize="008um")
-{SelectedBarcodes<-barcodes %>% stats::filter(DeconvolutionLabel1==celltype)
-  Result<-GetSlice(SelectedBarcodes$barcode,distance,barcodes,data.dir,celltype=celltype, binsize="008um")
+{SelectedBarcodes<-barcodes %>% dplyr::filter(DeconvolutionLabel1==celltype)
+  Result<-Get_Circle(SelectedBarcodes$barcode,distance,barcodes,data.dir,celltype=celltype, binsize="008um")
   if(length(distance)>1)
   {for(jj in 1:length(Result))
   {Result[[jj]]<-Result[[jj]][Result[[jj]]%!in%SelectedBarcodes$barcode]}
@@ -190,7 +188,7 @@ Get_Periphery<-function(barcodes,celltype,distance=50,data.dir, binsize="008um")
 #' @return A character vector of the barcodes surrounding a cell expressing a
 #' gene
 #'
-#' @importFrom stats filter
+#' @importFrom dplyr filter
 #'
 #' @export
 #' @concept slicing
@@ -205,11 +203,11 @@ Get_Periphery<-function(barcodes,celltype,distance=50,data.dir, binsize="008um")
 #'
 
 Get_Gene_Periphery<-function(barcodes,gene,distance=50,data.dir, binsize="008um",seurat)
-{barcodes<-AddExpression(barcodes,seurat,gene)
+{barcodes<-Add_Expression(barcodes,seurat,gene)
   barcodes$DeconvolutionLabelg=barcodes$DeconvolutionLabel1
   barcodes$DeconvolutionLabelg=barcodes%>%pull(gene)>0
-  SelectedBarcodes<-barcodes %>% stats::filter(DeconvolutionLabelg==TRUE)
-  Result<-GetSlice(SelectedBarcodes$barcode,distance,barcodes,data.dir,binsize="008um")
+  SelectedBarcodes<-barcodes %>% dplyr::filter(DeconvolutionLabelg==TRUE)
+  Result<-Get_Circle(SelectedBarcodes$barcode,distance,barcodes,data.dir,binsize="008um")
   if(length(distance)>1)
   {for(jj in 1:length(Result))
   {Result[[jj]]<-Result[[jj]][Result[[jj]]%!in%SelectedBarcodes$barcode]}

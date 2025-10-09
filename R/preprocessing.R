@@ -9,9 +9,8 @@
 #' @return A list with two tibbles: \code{barcodes} and \code{images}
 #'
 #' @importFrom arrow read_parquet
-#' @importFrom dplyr rename_with %>% bind_rows mutate
+#' @importFrom dplyr rename_with %>% bind_rows mutate filter
 #' @importFrom rjson fromJSON
-#' @importFrom stats filter
 #'
 #' @export
 #' @concept preprocessing
@@ -88,7 +87,7 @@ return(list(images=images,barcodes=barcodes))}
 #' \dontrun{
 #' data_dir <- 'path/to/outs/directory'
 #' list.files(data_dir) # Should show spatial folder
-#' images=Create_Images(data.dir = data_dir)
+#' Images=Create_Images(data.dir = data_dir)
 #' }
 #'
 Create_Images<-function (data.dir)
@@ -117,7 +116,7 @@ return(images)}
 #' \dontrun{
 #' data_dir <- 'path/to/outs/directory'
 #' list.files(data_dir) # Should show spatial folder
-#' image=Get_Spatial_Files(data.dir = data_dir, type="tissue_lowres_image")
+#' Image=Get_Spatial_Files(data.dir = data_dir, type="tissue_lowres_image")
 #' }
 #'
 Get_Spatial_Files<-function (data.dir, type)
