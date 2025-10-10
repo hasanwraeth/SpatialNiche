@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="800"  src="https://github.com/hasanwraeth/SpatialNiche/blob/main/SpatialNiche_logo.png">
+  <img width="700"  src="https://github.com/hasanwraeth/SpatialNiche/blob/main/SpatialNiche_logo.png">
 </p>
 
 # SpatialNiche
