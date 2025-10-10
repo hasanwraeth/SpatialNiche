@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="200"  src="https://github.com/hasanwraeth/SpatialNiche/blob/main/SpatialNiche_logo.png">
+</p>
+
 # SpatialNiche
 
 ![Status](https://img.shields.io/badge/build-beta-blue)
