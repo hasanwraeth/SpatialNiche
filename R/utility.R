@@ -10,11 +10,6 @@
 #' @export
 #' @concept utility
 #'
-#' @examples
-#' \dontrun{
-#' Notx=x`%!in%`y
-#' }
-#'
 
 `%!in%` <- function(x,y)!(`%in%`(x,y))
 
@@ -66,3 +61,4 @@ Compute_Cell_Distance <- function(coordinates, interaction.range = NULL, ratio =
   }
   return(d.spatial)
 }
+
