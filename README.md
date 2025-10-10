@@ -1,6 +1,6 @@
 # SpatialNiche
 
-![Status](https://img.shields.io/badge/build-alpha-red)
+![Status](https://img.shields.io/badge/build-beta-blue)
 
 Latest Release:
 * Github: ![Github Release](https://img.shields.io/badge/release-v0.1.0-blue)
@@ -8,7 +8,9 @@ Latest Release:
 Package for automatic detection of niche in Visium HD data.
 
 ## Capabilities
-1.
+1. Automatic niche detection based on a specific cell type.
+2. Automatic niche detection based on a specific gene.
+3. Automatic distance measurement for each bin/cell.
 
 
 ## Installation
