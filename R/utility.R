@@ -12,11 +12,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' Notx=x%!in%y
+#' Notx=x`%!in%`y
 #' }
 #'
 
-'%!in%' <- function(x,y)!('%in%'(x,y))
+`%!in%` <- function(x,y)!(`%in%`(x,y))
 
 
 #' Compute cell-cell distance based on the spatial coordinates
