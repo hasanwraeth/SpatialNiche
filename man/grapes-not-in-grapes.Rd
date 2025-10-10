@@ -19,7 +19,7 @@ Matching operator (x not in y) oposed to the %in%-operator (x in y)
 }
 \examples{
 \dontrun{
-Notx=x\%!in\%y
+Notx=x`\%!in\%`y
 }
 
 }
