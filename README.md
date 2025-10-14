@@ -28,7 +28,7 @@ devtools::install_github("hasanwraeth/SpatialNiche")
 
 ## Tutorials
 
-In progress....
+[SpatialNiche vignette](https://raw.githack.com//hasanwraeth/SpatialNiche/blob/main/vignettes/SpatialNiche.html)
 
 
 ## Credits
