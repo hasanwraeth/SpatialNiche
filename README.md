@@ -27,8 +27,11 @@ devtools::install_github("hasanwraeth/SpatialNiche")
 
 
 ## Tutorials
+Please find the tutorial below. Please check the [K Chen, S Zhao, HA Reza et al., Nature Protocols 2024](https://www.biorxiv.org/content/10.1101/2025.07.07.663390v1.full) for a comprehensive usage of SpatialNiche. 
 
-[SpatialNiche vignette](https://raw.githack.com//hasanwraeth/SpatialNiche/master/vignettes/SpatialNiche_vignette.html)
+
+### Analysis of VisiumHD dataset for automatic niche detection
+-[SpatialNiche vignette](https://raw.githack.com//hasanwraeth/SpatialNiche/master/vignettes/SpatialNiche_vignette.html)
 
 
 ## Credits
