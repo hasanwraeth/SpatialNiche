@@ -1,0 +1,243 @@
+---
+title: "Automatic detection of niche in Visium HD data using SpatialNiche"
+author: "Hasan Al Reza"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    toc: true
+    theme: united
+mainfont: Arial
+vignette: >
+  %\VignetteIndexEntry{Automatic detection of niche in Visium HD data using SpatialNiche}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  comment = "#>",
+  root.dir = './'
+)
+#knitr::opts_chunk$set(eval = FALSE)
+```
+
+
+This vignette outlines the steps of inference, analysis and visualization of niche for **a Visium HD spatial dataset using SpatialNiche**. We showcase SpatialNiche’s diverse functionalities by applying it to a Visium HD data on cells from Lymphangioleiomyomatosis (LAM, diseased) human lung from a patient.  
+
+SpatialNiche requires raw Visium HD spaceranger output and optionally processed gene expression data of cells/bins from Seurat objects as the user input and models the niche based on a specific cell type or gene expression. 
+
+Upon infering the niche, SpatialNichet provides functionality for further data exploration, analysis, and visualization. 
+
+
+## Load the required libraries
+```{r message=FALSE,warning=FALSE}
+library(SpatialNiche)
+library(ggplot2) #for visualization
+library(dplyr) #for data wrangling
+library(scattermore) #for spatial plotting
+```
+
+# Part I: Data input & processing and initialization of SpatialNiche list containing barcodes and images tibble
+SpatialNiche requires two user inputs: one is the path to outs directory of the spaceranger output of the Visium HD dataset, and the other is the bins size you want to load. 
+
+## Starting from spaceranger output
+```{r}
+localdir <- "../../../4_em/outs" # path to outs directory of the spaceranger output of the Visium HD dataset
+
+DataHD<-Load_Spatial_Data(localdir, size = '008um') #loading the data using the path and the bin size
+
+bcsHD<-DataHD$barcodes #pulling the barcodes tibble out for easier access
+
+head(bcsHD) #look at the top entries
+
+```
+
+
+# Part II: Adding dconvolution information to SpatialNiche barcodes tibble
+SpatialNiche supports import of spacexr's RCTD based deconvolution information. Thre RCTD result can be directly loaded as an rds object and imported directly into the barcodes tibble.
+
+## Starting from RCTD output
+```{r}
+DeconvolutionHD<-Load_RCTD('../../../RCTD_d4_SCT.rds') #load rds object of RCTD results
+
+bcsHD<-Add_Deconvolution_Info(bcsHD,DeconvolutionHD,addWeights=FALSE) #use in-built function to import RCTD deconvolution results
+
+bcsHD<-bcsHD %>% na.omit() #remove blank barcodes with no deconvolution information
+
+head(bcsHD[, c(1,13:15)]) #look at the top entries with deconvolution information
+
+```
+
+# Part III: Creating niche information
+SpatialNiche creates niche information based on a specific cell type or gene expression.The niche information is defined based on a sepcific distance away from the bins/cells of interest.
+
+## Defining niche based on a cell type
+```{r}
+PeripheryBCs<-Get_Periphery(barcodes=bcsHD, celltype='LAMCORE-1',distance=50,data.dir = localdir) #find barcodes in the cell specific niche
+
+bcsHD$Periphery<-NA #assign empty column to barcodes tibble
+
+bcsHD$Periphery[bcsHD$barcode%in%PeripheryBCs]<-"50 micron" #assign name to bins in the niche 
+
+bcsHD$Periphery[is.na(bcsHD$Periphery)]<-"Tissue" #assign name to bins outside the niche 
+
+bcsHD$Periphery[bcsHD$Periphery=="Tissue" & bcsHD$DeconvolutionLabel1=='LAMCORE-1']<-'LAMCORE-1' #assign name to bins specifying the niche 
+
+head(bcsHD[, c(1,14:16)]) #look at the top entries with cell based niche information
+
+```
+
+## Defining niche based on gene expression
+```{r}
+em_d4 <- readRDS("../../../em_d4_SCT.rds") #import seurat object
+
+bcsHD<-Add_Expression(bcsHD,em_d4,c("PMEL")) #add gene expression data to barcodes tibble
+
+PeripheryGCs<-Get_Gene_Periphery(barcodes=bcsHD, gene=c("PMEL"), seurat=em_d4,distance=50,data.dir = localdir) #find barcodes in the gene specific niche
+
+bcsHD$Peripheryg<-NA #assign empty column to barcodes tibble
+
+bcsHD$Peripheryg[bcsHD$barcode%in%PeripheryGCs]<-"50 micron" #assign name to bins in the niche 
+
+bcsHD$Peripheryg[is.na(bcsHD$Peripheryg)]<-"Tissue" #assign name to bins outside the niche 
+
+bcsHD$Peripheryg[bcsHD$Peripheryg=="Tissue" & bcsHD$PMEL>0]<-'PMEL' #assign name to bins specifying the niche 
+
+head(bcsHD[, c(1,14:18)]) #look at the top entries with gene expression based niche information
+
+```
+
+
+# Part IV: Visualizing niche results
+Upon infering the niche information, SpatialNiche provides various functionality for further data exploration, analysis, and visualization. Specifically:
+
+* It provides utilities for slicing the dataset into smaller region of interest.
+
+* It provides tools for visualization of deconvolution information.
+
+* It provides tools for visualization of niche information.
+
+## slicing the dataset into smaller ROIs
+```{r}
+SliceA<-Get_Square('s_008um_00128_00230-1',250,bcsHD) #find barcodes in a Square ROI
+
+head(SliceA) #look at the top barcodes in the Square ROI
+
+SliceB<-Get_Rectangle('s_008um_00331_00466-1',300,0.65,1.1,bcsHD) #find barcodes in a Rectangle ROI, use xfactor and yfactor to control size of the rectangle
+
+head(SliceB) #look at the top barcodes in the Rectangle ROI
+
+SliceC<-Get_Circle('s_008um_00128_00230-1',125,bcsHD, localdir) #find barcodes in a Circle ROI
+
+head(SliceC) #look at the top barcodes in the Circle ROI
+
+```
+
+## Visualizing based on deconvolution information
+```{r}
+bcsHD %>% filter(DeconvolutionClass=="singlet") %>%
+  ggplot(aes(x = imagecol_scaled, y = -imagerow_scaled,color=DeconvolutionLabel1)) +
+  Geom_Spatial(data = DataHD$images, aes(grob = grob), x = 0.5, y = 0.5)+
+  geom_scattermore(pointsize = 2,pixels = rep(2000,2))+
+  coord_cartesian(expand = FALSE) +
+  xlab("") +
+  ylab("") +
+  theme_set(theme_bw(base_size = 10))+
+  theme_minimal() +
+  theme(axis.text = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank()) #Visualize singlets by deconvolution label
+bcsHD  %>%
+  ggplot(aes(x = imagecol_scaled, y = -imagerow_scaled,color=DeconvolutionLabel1)) +
+  Geom_Spatial(data = DataHD$images, aes(grob = grob), x = 0.5, y = 0.5) +
+  geom_point(shape=16,size=2)+
+  coord_cartesian(expand = FALSE) +
+  xlab("") +
+  ylab("") + 
+  theme_set(theme_bw(base_size = 10))+
+  theme_minimal() +
+  theme(axis.text = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank()) #Visualize all bins by deconvolution label
+
+```
+
+## Visualizing based on niche information
+```{r}
+bcA=bcsHD[bcsHD$Periphery!='Tissue',] #Create new tibble with only bins in the cell specific niche
+
+bcA %>%
+  ggplot(aes(x = imagecol_scaled, y = -imagerow_scaled,color=Periphery)) +
+  Geom_Spatial(data = DataHD$images, aes(grob = grob), x = 0.5, y = 0.5) +
+  geom_scattermore(pointsize = 2,pixels = rep(2000,2)) +
+  scale_color_manual(values=c('green','red','grey')) +
+  coord_cartesian(expand = FALSE) +
+  xlab("") +
+  ylab("") +
+  theme_set(theme_bw(base_size = 10)) +
+  theme_minimal() +
+  theme(axis.text = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank()) #Visualize bins in the niche
+bcA=bcsHD[bcsHD$Peripheryg!='Tissue',] #Create new tibble with only bins in the gene specific niche
+
+bcA %>%
+  ggplot(aes(x = imagecol_scaled, y = -imagerow_scaled,color=Peripheryg)) +
+  Geom_Spatial(data = DataHD$images, aes(grob = grob), x = 0.5, y = 0.5) +
+  geom_scattermore(pointsize = 2,pixels = rep(2000,2)) +
+  scale_color_manual(values=c('green','red','grey')) +
+  coord_cartesian(expand = FALSE) +
+  xlab("") +
+  ylab("") +
+  theme_set(theme_bw(base_size = 10)) +
+  theme_minimal() +
+  theme(axis.text = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank()) #Visualize bins in the niche
+
+```
+
+
+# Part V: Calculating distance information
+SpatialNiche is also capable of creating distance information by translating the pixel sizes to the micron scale. The results are output as a distane matrix that can be converted to a dataframe for use.
+
+## Defining niche based on a cell type
+```{r}
+em_d4G1 <- readRDS("../../../KWB/em_d4_G1.rds") #import seurat object
+
+spatial.locs = Seurat::GetTissueCoordinates(em_d4G1, scale = NULL, cols = c("imagerow", "imagecol")) #get coordinates from seurat object
+
+spatial.locs = spatial.locs[,1:2] #remove barcodes from coordinates table
+
+spot.size = 8 #assigning spot size
+
+conversion.factor = spot.size/em_d4G1@images$slice1.008um@scale.factors$spot #calculate conversion factor
+
+spatial.factors = data.frame(ratio = conversion.factor, tol = spot.size/2) #creating spatial factor
+
+d.spatial <- Compute_Cell_Distance(coordinates = spatial.locs, ratio = spatial.factors$ratio, tol = spatial.factors$tol) #creating distance matrix
+
+min(d.spatial[d.spatial!=0]) # this value should approximately equal 8um for 10X VisiumHD data
+
+df=as.data.frame(as.matrix(d.spatial)) #convert distance matrix to dataframe
+
+head(df[,1:6]) #look at the distance between the top barcodes
+
+```
+
+
+# Part VI: Save the SpatialNiche files
+```{r eval=FALSE}
+saveRDS(DataHD, 'DataHD.rds') #save SpatialNiche list containing barcodes and images tibble
+
+saveRDS(PeripheryBCs, 'PeripheryBCs.rds') #save barcodes in the cell specific niche
+
+saveRDS(PeripheryGCs, 'PeripheryGCs.rds') #save barcodes in the gene specific niche
+```
+
+
+```{r}
+sessionInfo()
+```
