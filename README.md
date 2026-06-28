@@ -31,7 +31,7 @@ Please find the tutorial below. Please check the [K Chen, S Zhao, HA Reza et al.
 
 
 ### Analysis of VisiumHD dataset for automatic niche detection
-- [SpatialNiche vignette](https://raw.githack.com//hasanwraeth/SpatialNiche/master/vignettes/SpatialNiche_vignette.html)
+- [SpatialNiche vignette](http://htmlpreview.github.io/?https://github.com/hasanwraeth/SpatialNiche/blob/main/vignettes/SpatialNiche_vignette.html)
 
 
 ## Credits
