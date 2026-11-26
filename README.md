@@ -30,6 +30,13 @@ devtools::install_github("hasanwraeth/SpatialNiche")
 Please find the tutorial below. Please check the [K Chen, S Zhao, HA Reza et al., bioRxiv 2025](https://www.biorxiv.org/content/10.1101/2025.07.07.663390v1.full) for a comprehensive usage of SpatialNiche. 
 
 
+## Segmentation
+
+<p align="center">
+  <img width="500"  src="https://github.com/hasanwraeth/SpatialNiche/blob/main/Segmentation.png">
+</p>
+
+
 ### Analysis of VisiumHD dataset for automatic niche detection
 - [SpatialNiche vignette](http://htmlpreview.github.io/?https://github.com/hasanwraeth/SpatialNiche/blob/main/vignettes/SpatialNiche_vignette.html)
 
